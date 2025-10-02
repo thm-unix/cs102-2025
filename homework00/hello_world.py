@@ -1,2 +1,2 @@
-def text():
+def text(message: str):
     return message
