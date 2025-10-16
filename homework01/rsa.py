@@ -3,53 +3,56 @@ import typing as tp
 
 
 def is_prime(n: int) -> bool:
-	"""
-	Tests to see if a number is prime.
-	>>> is_prime(2)
-	True
-	>>> is_prime(11)
-	True
-	>>> is_prime(8)
-	False
-	"""
-	if n < 0:
-		return False
-	lst = [False, False] + [True] * (n - 1)
-	num = 2
-	while num ** 2 <= n:
-		if lst[num]:
-			for i in range(num ** 2, n + 1, num):
-				lst[i] = False
-		num += 1
-	return lst[n]
+    """
+    Tests to see if a number is prime.
+    >>> is_prime(2)
+    True
+    >>> is_prime(11)
+    True
+    >>> is_prime(8)
+    False
+    """
+    if n < 0:
+        return False
+    lst = [False, False] + [True] * (n - 1)
+    num = 2
+    while num**2 <= n:
+        if lst[num]:
+            for i in range(num**2, n + 1, num):
+                lst[i] = False
+        num += 1
+    return lst[n]
+
 
 def gcd(a: int, b: int) -> int:
-	"""
-	Euclid's algorithm for determining the greatest common divisor.
-	>>> gcd(12, 15)
-	3
-	>>> gcd(3, 7)
-	1
-	"""
-	if a == 0 or b == 0:
-		return max(a, b)
-	while a % b != 0:
-		c = a % b
-		a = b
-		b = c
-	return b
+    """
+    Euclid's algorithm for determining the greatest common divisor.
+    >>> gcd(12, 15)
+    3
+    >>> gcd(3, 7)
+    1
+    """
+    if a == 0 or b == 0:
+        return max(a, b)
+    while a % b != 0:
+        c = a % b
+        a = b
+        b = c
+    return b
+
 
 def multiplicative_inverse(e: int, phi: int) -> int:
-	"""
-	Euclid's extended algorithm for finding the multiplicative
-	inverse of two numbers.
-	>>> multiplicative_inverse(7, 40)
-	23
-	"""
-	for x in range(1, phi):
-		if ((e % phi) * (x % phi)) % phi == 1:
-			return x
-	return 0
+    """
+    Euclid's extended algorithm for finding the multiplicative
+    inverse of two numbers.
+    >>> multiplicative_inverse(7, 40)
+    23
+    """
+    for x in range(1, phi):
+        if ((e % phi) * (x % phi)) % phi == 1:
+            return x
+    return 0
+
 
 def generate_keypair(p: int, q: int) -> tp.Tuple[tp.Tuple[int, int], tp.Tuple[int, int]]:
     if not (is_prime(p) and is_prime(q)):
@@ -91,7 +94,7 @@ def decrypt(pk: tp.Tuple[int, int], ciphertext: tp.List[int]) -> str:
     # Unpack the key into its components
     key, n = pk
     # Generate the plaintext based on the ciphertext and key using a^b mod m
-    plain = [chr((char ** key) % n) for char in ciphertext]
+    plain = [chr((char**key) % n) for char in ciphertext]
     # Return the array of bytes as a string
     return "".join(plain)
 
