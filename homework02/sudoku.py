@@ -1,6 +1,10 @@
 import pathlib
 import typing as tp
 from math import sqrt
+from random import shuffle, choice
+from itertools import product
+import sys
+import multiprocessing
 
 T = tp.TypeVar("T")
 
@@ -141,56 +145,100 @@ def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -
 
 
 def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
-    """ Решение пазла, заданного в grid """
-    """ Как решать Судоку?
-        1. Найти свободную позицию
-        2. Найти все возможные значения, которые могут находиться на этой позиции
-        3. Для каждого возможного значения:
-            3.1. Поместить это значение на эту позицию
-            3.2. Продолжить решать оставшуюся часть пазла
-    >>> grid = read_sudoku('puzzle1.txt')
-    >>> solve(grid)
-    [['5', '3', '4', '6', '7', '8', '9', '1', '2'], ['6', '7', '2', '1', '9', '5', '3', '4', '8'], ['1', '9', '8', '3', '4', '2', '5', '6', '7'], ['8', '5', '9', '7', '6', '1', '4', '2', '3'], ['4', '2', '6', '8', '5', '3', '7', '9', '1'], ['7', '1', '3', '9', '2', '4', '8', '5', '6'], ['9', '6', '1', '5', '3', '7', '2', '8', '4'], ['2', '8', '7', '4', '1', '9', '6', '3', '5'], ['3', '4', '5', '2', '8', '6', '1', '7', '9']]
-    """
-    pass
+	""" Решение пазла, заданного в grid """
+	""" Как решать Судоку?
+	    1. Найти свободную позицию
+	    2. Найти все возможные значения, которые могут находиться на этой позиции
+	    3. Для каждого возможного значения:
+	        3.1. Поместить это значение на эту позицию
+	        3.2. Продолжить решать оставшуюся часть пазла
+	>>> grid = read_sudoku('puzzle1.txt')
+	>>> solve(grid)
+	[['5', '3', '4', '6', '7', '8', '9', '1', '2'], ['6', '7', '2', '1', '9', '5', '3', '4', '8'], ['1', '9', '8', '3', '4', '2', '5', '6', '7'], ['8', '5', '9', '7', '6', '1', '4', '2', '3'], ['4', '2', '6', '8', '5', '3', '7', '9', '1'], ['7', '1', '3', '9', '2', '4', '8', '5', '6'], ['9', '6', '1', '5', '3', '7', '2', '8', '4'], ['2', '8', '7', '4', '1', '9', '6', '3', '5'], ['3', '4', '5', '2', '8', '6', '1', '7', '9']]
+	"""
+	position = find_empty_positions(grid)
+	if position is None:
+		return grid
+
+	values = list(find_possible_values(grid, position))
+	shuffle(values)
+	for value in values:
+		grid[position[0]][position[1]] = value
+		if solve(grid):
+			return grid
+		grid[position[0]][position[1]] = '.'
+	return None
 
 
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
-    """ Если решение solution верно, то вернуть True, в противном случае False """
-    # TODO: Add doctests with bad puzzles
-    pass
+	""" Если решение solution верно, то вернуть True, в противном случае False """
+	# TODO: Add doctests with bad puzzles
+	for i, row in enumerate(solution):
+		for j, column in enumerate(row):
+			block = get_block(solution, (i, j))
+			if len(block) != len(set(block)) or '.' in block:
+				return False
+
+			grid_row = get_row(solution, (i, j))
+			if len(grid_row) != len(set(grid_row)) or '.' in grid_row:
+				return False
+
+			grid_column = get_col(solution, (i, j))
+			if len(grid_column) != len(set(grid_column)) or '.' in grid_column:
+				return False
+	return True
 
 
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
-    """Генерация судоку заполненного на N элементов
-    >>> grid = generate_sudoku(40)
-    >>> sum(1 for row in grid for e in row if e == '.')
-    41
-    >>> solution = solve(grid)
-    >>> check_solution(solution)
-    True
-    >>> grid = generate_sudoku(1000)
-    >>> sum(1 for row in grid for e in row if e == '.')
-    0
-    >>> solution = solve(grid)
-    >>> check_solution(solution)
-    True
-    >>> grid = generate_sudoku(0)
-    >>> sum(1 for row in grid for e in row if e == '.')
-    81
-    >>> solution = solve(grid)
-    >>> check_solution(solution)
-    True
-    """
-    pass
+	"""Генерация судоку заполненного на N элементов
+	>>> grid = generate_sudoku(40)
+	>>> sum(1 for row in grid for e in row if e == '.')
+	41
+	>>> solution = solve(grid)
+	>>> check_solution(solution)
+	True
+	>>> grid = generate_sudoku(1000)
+	>>> sum(1 for row in grid for e in row if e == '.')
+	0
+	>>> solution = solve(grid)
+	>>> check_solution(solution)
+	True
+	>>> grid = generate_sudoku(0)
+	>>> sum(1 for row in grid for e in row if e == '.')
+	81
+	>>> solution = solve(grid)
+	>>> check_solution(solution)
+	True
+	"""
+	SQUARE_SIZE_SQ = 9
+	if N > SQUARE_SIZE_SQ ** 2:
+		print('N is bigger than amount of cells in the grid.', file=sys.stderr)
+		return []
+
+	my_grid = []
+	for _ in range(SQUARE_SIZE_SQ):
+		my_grid.append(['.'] * SQUARE_SIZE_SQ)
+	solution = solve(my_grid)
+	indexes = [
+		value for value in product(range(SQUARE_SIZE_SQ), repeat=2)
+	]
+	for _ in range(SQUARE_SIZE_SQ ** 2 - N):
+		cell = choice(indexes)
+		solution[cell[0]][cell[1]] = '.'
+		indexes.remove(cell)
+	return solution
+
+def run_solve(filename):
+	grid = read_sudoku(fname)
+	#display(grid)
+	solution = solve(grid)
+	if not solution:
+		print(f"Puzzle {fname} can't be solved")
+	else:
+		display(solution)
 
 
 if __name__ == "__main__":
-    for fname in ["puzzle1.txt", "puzzle2.txt", "puzzle3.txt"]:
-        grid = read_sudoku(fname)
-        display(grid)
-        solution = solve(grid)
-        if not solution:
-            print(f"Puzzle {fname} can't be solved")
-        else:
-            display(solution)
+	for fname in ["puzzle1.txt", "puzzle2.txt", "puzzle3.txt"]:
+		p = multiprocessing.Process(target=run_solve, args=(fname,))
+		p.start()
