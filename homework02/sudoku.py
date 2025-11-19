@@ -1,5 +1,6 @@
 import pathlib
 import typing as tp
+from math import sqrt
 
 T = tp.TypeVar("T")
 
@@ -76,45 +77,63 @@ def get_col(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str
 	['3', '6', '9']
 	"""
 	transposed_grid = [row for row in zip(*grid)]
-	return transposed_grid[pos[1]]
+	return list(transposed_grid[pos[1]])
 
 
 def get_block(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.List[str]:
-    """Возвращает все значения из квадрата, в который попадает позиция pos
-    >>> grid = read_sudoku('puzzle1.txt')
-    >>> get_block(grid, (0, 1))
-    ['5', '3', '.', '6', '.', '.', '.', '9', '8']
-    >>> get_block(grid, (4, 7))
-    ['.', '.', '3', '.', '.', '1', '.', '.', '6']
-    >>> get_block(grid, (8, 8))
-    ['2', '8', '.', '.', '.', '5', '.', '7', '9']
-    """
-    pass
+	"""Возвращает все значения из квадрата, в который попадает позиция pos
+	>>> grid = read_sudoku('puzzle1.txt')
+	>>> get_block(grid, (0, 1))
+	['5', '3', '.', '6', '.', '.', '.', '9', '8']
+	>>> get_block(grid, (4, 7))
+	['.', '.', '3', '.', '.', '1', '.', '.', '6']
+	>>> get_block(grid, (8, 8))
+	['2', '8', '.', '.', '.', '5', '.', '7', '9']
+	"""
+	square_size = int(sqrt(len(grid)))
+	vertical_square_index = pos[0] // square_size
+	horizontal_square_index = pos[1] // square_size
+
+	v_start_index = vertical_square_index * square_size
+	v_end_index = v_start_index + square_size
+	v_part = grid[v_start_index:v_end_index]
+
+	h_start_index = horizontal_square_index * square_size
+	h_end_index = h_start_index + square_size
+
+	result = []
+	for item in v_part:
+		result += item[h_start_index:h_end_index]
+
+	return result
 
 
 def find_empty_positions(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.Tuple[int, int]]:
-    """Найти первую свободную позицию в пазле
-    >>> find_empty_positions([['1', '2', '.'], ['4', '5', '6'], ['7', '8', '9']])
-    (0, 2)
-    >>> find_empty_positions([['1', '2', '3'], ['4', '.', '6'], ['7', '8', '9']])
-    (1, 1)
-    >>> find_empty_positions([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']])
-    (2, 0)
-    """
-    pass
-
+	"""Найти первую свободную позицию в пазле
+	>>> find_empty_positions([['1', '2', '.'], ['4', '5', '6'], ['7', '8', '9']])
+	(0, 2)
+	>>> find_empty_positions([['1', '2', '3'], ['4', '.', '6'], ['7', '8', '9']])
+	(1, 1)
+	>>> find_empty_positions([['1', '2', '3'], ['4', '5', '6'], ['.', '8', '9']])
+	(2, 0)
+	"""
+	for i, row in enumerate(grid):
+		for j, column in enumerate(row):
+			if column == '.':
+				return (i, j)
+	return None
 
 def find_possible_values(grid: tp.List[tp.List[str]], pos: tp.Tuple[int, int]) -> tp.Set[str]:
-    """Вернуть множество возможных значения для указанной позиции
-    >>> grid = read_sudoku('puzzle1.txt')
-    >>> values = find_possible_values(grid, (0,2))
-    >>> values == {'1', '2', '4'}
-    True
-    >>> values = find_possible_values(grid, (4,7))
-    >>> values == {'2', '5', '9'}
-    True
-    """
-    pass
+	"""Вернуть множество возможных значения для указанной позиции
+	>>> grid = read_sudoku('puzzle1.txt')
+	>>> values = find_possible_values(grid, (0,2))
+	>>> values == {'1', '2', '4'}
+	True
+	>>> values = find_possible_values(grid, (4,7))
+	>>> values == {'2', '5', '9'}
+	True
+	"""
+	pass
 
 
 def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
