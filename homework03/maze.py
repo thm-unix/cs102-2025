@@ -1,13 +1,11 @@
 from copy import deepcopy
-from enum import Enum
 from random import choice, randint
 from typing import List, Optional, Tuple, Union
-
 from pandas import DataFrame
+from enum import Enum
 
 DELTAS = ((0, 1), (1, 0), (-1, 0), (0, -1))
-MARKER = "■"
-
+MARKER = '■'
 
 class Direction(Enum):
     UP = 1
@@ -33,7 +31,7 @@ def remove_wall(grid, coord):
         else:
             return grid
 
-    grid[row + dr][column + dc] = " "
+    grid[row + dr][column + dc] = ' '
     return grid
 
 
@@ -64,7 +62,7 @@ def get_exits(grid: List[List[Union[str, int]]]) -> List[Tuple[int, int]]:
     exits = []
     for i, row in enumerate(grid):
         for j, column in enumerate(row):
-            if column == "X":
+            if column == 'X':
                 exits.append((i, j))
     return exits
 
@@ -77,7 +75,7 @@ def make_step(grid: List[List[Union[str, int]]], k: int) -> List[List[Union[str,
                     new_row, new_column = i + dr, j + dc
                     if new_row in range(len(grid)) and new_column in range(len(grid[0])):
                         if grid[new_row][new_column] == 0:
-                            grid[i + dr][j + dc] = k + 1
+                            grid[i+dr][j+dc] = k + 1
 
     return grid
 
@@ -88,7 +86,7 @@ def shortest_path(
     row, column = exit_coord
     cell = grid[row][column]
     if not cell or not isinstance(cell, int):
-        return None
+        return
 
     path = [(row, column)]
     while cell > 1:
@@ -101,7 +99,7 @@ def shortest_path(
                     path.append((row, column))
                     break
         else:
-            return None
+            return
     return path
 
 
@@ -133,7 +131,7 @@ def solve_maze(
     grid_cpy = deepcopy(grid)
     for i, row in enumerate(grid_cpy):
         for j, column in enumerate(row):
-            if column in ("X", " "):
+            if column in ('X', ' '):
                 grid_cpy[i][j] = 0
 
     exit1, exit2 = exits
@@ -151,7 +149,6 @@ def solve_maze(
         return grid_cpy, None
 
     return grid_cpy, shortest_path(grid_cpy, exit2)
-
 
 def add_path_to_grid(
     grid: List[List[Union[str, int]]], path: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]]
