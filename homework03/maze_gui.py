@@ -3,9 +3,6 @@ from typing import List
 from tkinter import ttk, messagebox
 from maze import bin_tree_maze, solve_maze, add_path_to_grid
 
-CELL_SIZE = 10
-N, M = 51, 77
-
 
 def draw_cell(x, y, color, size: int = 10):
     x *= size
@@ -22,22 +19,26 @@ def draw_maze(grid: List[List[str]], size: int = 10):
                 color = 'White'
             elif cell == "■":
                 color = 'black'
-            else:  # 'X'
-                color = "green"
+            elif cell == "X":
+                color = "red"
             draw_cell(y, x, color, size)
 
 
-def show_solution(displayed_maze, displayed_path):
-    displayed_maze = add_path_to_grid(GRID, displayed_path)
-    draw_maze(displayed_maze, CELL_SIZE)
+def show_solution():
+    maze, path = solve_maze(GRID)
+    maze = add_path_to_grid(GRID, path)
+    if path:
+        draw_maze(maze, CELL_SIZE)
+    else:
+        tk.messagebox.showinfo("Message", "No solutions")
 
 
 if __name__ == "__main__":
-    has_solution = False
-    while not has_solution:
-        GRID = bin_tree_maze(N, M)
-        maze, path = solve_maze(GRID)
-        has_solution = bool(path)
+    global GRID, CELL_SIZE
+    N, M = 51, 77
+
+    CELL_SIZE = 10
+    GRID = bin_tree_maze(N, M)
 
     window = tk.Tk()
     window.title('Maze')
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     canvas.pack()
 
     draw_maze(GRID, CELL_SIZE)
-    ttk.Button(window, text="Solve", command=lambda: show_solution(maze, path)).pack(pady=20)
+    ttk.Button(window, text="Solve", command=show_solution).pack(pady=20)
 
     window.mainloop()
 
