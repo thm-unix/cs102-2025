@@ -1,7 +1,7 @@
+import copy
 import pathlib
 import random
 import typing as tp
-import copy
 
 import pygame
 from pygame.locals import *

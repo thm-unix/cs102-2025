@@ -1,5 +1,5 @@
 import pygame
-from pygame import SurfaceType, Surface
+from pygame import Surface, SurfaceType
 from pygame.locals import *
 
 from life import GameOfLife
