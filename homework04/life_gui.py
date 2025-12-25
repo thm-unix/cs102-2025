@@ -1,8 +1,7 @@
 import pygame
+from life import GameOfLife
 from pygame import Surface, SurfaceType
 from pygame.locals import *
-
-from life import GameOfLife
 from ui import UI
 
 
